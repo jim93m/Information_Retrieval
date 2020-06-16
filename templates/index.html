@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+		<style>
+			
+			
+			#my_range{
+				margin-right: 80px;
+			}
+			.jumbotron{
+				background-color: #72C9D0;
+				padding-right: 200px;
+				padding-left: 200px;}
+			#page_header{
+				margin-top: 50px;
+				margin-bottom: 30px;}
+			#submit_btn{
+				margin-top: 20px;
+				margin-bottom: 0px;
+				padding-right: 40px;
+				padding-left: 40px;}
+			.elem_pad{
+				margin-right: 10px;
+				margin-left: 10px;
+			}
+			#in_query{
+				width: 60%;
+			}
+			.text{
+				font-size: 22px;
+			}
+			#dist{
+				width: 15%;
+			}
+			.small_marg{
+				margin-right: 10px;
+				margin-left: 10px;
+			}
+			
+			table {
+				font-family: arial, sans-serif;
+				border-collapse: collapse;
+				width: 80%;
+				
+			}
+			
+			#table_text {
+				font-size: 11px;
+			}
+
+			td, th {
+				border: 1px solid #dddddd;
+				text-align: left;
+				padding: 8px;
+			}
+
+			tr:nth-child(even) {
+				background-color: #dddddd;
+			}
+			
+			
+		</style>
+	</head>
+	<body>
+	
+		<h1 id="page_header" align=center>Article Search</h1>
+		<div id = "jumbotron" class="jumbotron">
+		<p class="text">This is a tool for retrieving relevant articles from a database, given a search query. 
+         The user can select the number of k relevant articles to be retrieved and a certain distance metric.
+         Then the user can offer feedback, selecting the most relevant articles from the results and recieve a second more refined result.
+		</p>
+		
+		<div align=center>
+		
+			<br>
+			<label for="lquery" class="elem_pad text">Query:</label>
+			<input type="text" id="in_query" name="in_query" value="">
+			<br><br>
+			
+			<label align=center class="text small_marg">Top relevant articles:	<span id="n_articles">	</label>
+			<input type="range" min="1" max="20" value="5" class=" small_marg" id="my_range">
+			<label for="distances" class="text small_marg">Distance Measure:</label>
+			<select name="dist" id="dist" class=" text small_marg">
+				<option value="euclidean">Euclidean</option>
+				<option value="minkowski">Minkowski</option>
+				<option value="chebyshev">Chebyshev</option>
+				<option value="dice">Dice</option>
+				<option value="cosine">Cosine</option>
+			</select>
+			<br><br>
+			<input class="btn btn-primary btn-lg" align=center id="submit_btn" type="submit" value="Search">
+			
+		
+		</div>
+		</div>
+		
+		<br><br>	
+			
+
+			
+		<br><br>
+		<script>
+				var slider = document.getElementById("my_range");
+				var output = document.getElementById("n_articles");
+				output.innerHTML = slider.value;
+        
+				slider.oninput = function() {
+				output.innerHTML = this.value;
+				}
+			</script>
+			<script>
+				$("#submit_btn").click(function(){
+				
+				$.post("/post", 
+				{
+					query: $( "#in_query" ).val(),
+					k: $( "#my_range" ).val(),
+					distance: $( "select#dist option:checked" ).val()
+				}				
+				,function(results){
+				
+					$('#my_table').remove()
+					$('#jumbotron').after('<div #table_text> <table id="my_table" align=center> <tr> <th>Title</th> <th>Author</th> <th>Link</th> </tr> </table> </div>');
+				
+					$.each(results, function() {
+						$.each(this, function(index, article) {
+							$('#my_table tr:last').after(
+							'<tr> <td>'+ article.title +'</td> <td>'+ article.author +'</td> <td> <a href='+ article.article_link +' target="_blank">'+ article.article_link +'</a>' + '</td> </tr>');
+							
+						});
+					});					
+					});
+				});
+			</script>
+   	</body>
+</html>
